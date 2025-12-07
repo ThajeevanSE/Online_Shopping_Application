@@ -1,54 +1,40 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
+import { getToken } from "../services/authService";
 
-const Dashboard = () => {
-  const navigate = useNavigate();
+function Dashboard() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const fetchUser = async () => {
+      try {
+        const token = getToken();
+        const response = await api.get("/user/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(response.data);
+      } catch (error) {
+        console.error("Failed to fetch user data", error);
+      }
+    };
 
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    axios
-      .get("http://localhost:8080/api/user/me", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      .then((res) => {
-        setUser(res.data);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        navigate("/login");
-      });
-  }, [navigate]);
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+    fetchUser();
+  }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "40px" }}>
       <h2>Dashboard</h2>
-
       {user ? (
-        <>
-          <p><b>Name:</b> {user.name}</p>
-          <p><b>Email:</b> {user.email}</p>
-          <button onClick={logout}>Logout</button>
-        </>
+        <div>
+          <p><strong>Name:</strong> {user.name}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          
+        </div>
       ) : (
         <p>Loading...</p>
       )}
     </div>
   );
-};
+}
 
 export default Dashboard;

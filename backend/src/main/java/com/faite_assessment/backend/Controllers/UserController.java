@@ -37,11 +37,15 @@ public class UserController {
     //UPDATE PROFILE
     @PutMapping("/update")
     public User updateProfile(
-            @RequestHeader("Authorization") String authHeader,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestPart("name") String name,
             @RequestPart(value = "dateOfBirth", required = false) String dob,
             @RequestPart(value = "profilePicture", required = false) MultipartFile file
     ) throws IOException {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
 
         String token = authHeader.substring(7);
         String email = jwtUtil.extractEmail(token);
@@ -49,31 +53,52 @@ public class UserController {
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setName(name);
 
-        if (dob != null && !dob.isEmpty()) {
+        if (name != null && !name.trim().isEmpty()) {
+            user.setName(name.trim());
+        }
+
+
+        if (dob != null && !dob.trim().isEmpty()) {
             user.setDateOfBirth(LocalDate.parse(dob));
         }
 
-        if (file != null && !file.isEmpty()) {
-            String folder = "uploads/profile_pictures/";
-            File dir = new File(folder);
-            if (!dir.exists()) dir.mkdirs();
 
-            String fileName = user.getId() + "_" + file.getOriginalFilename();
-            String filePath = folder + fileName;
+        if (file != null && !file.isEmpty()) {
+
+            // Allow only images
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new RuntimeException("Only image files are allowed");
+            }
+
+            // Safe project root folder
+            String uploadBase = System.getProperty("user.dir");
+            String folder = uploadBase + File.separator + "uploads" + File.separator + "profile_pictures";
+
+            File dir = new File(folder);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            // Clean and safe filename
+            String original = file.getOriginalFilename().replaceAll("[^a-zA-Z0-9._-]", "");
+            String fileName = user.getId() + "_" + System.currentTimeMillis() + "_" + original;
+
+            String filePath = folder + File.separator + fileName;
 
             file.transferTo(new File(filePath));
 
-            user.setProfilePicture(filePath);
+            // Save public path
+            user.setProfilePicture("/uploads/profile_pictures/" + fileName);
         }
 
         User saved = userService.saveUser(user);
-
         activityLogService.log(saved, "Profile updated");
 
         return saved;
     }
+
 
     //CHANGE PASSWORD
     @PutMapping("/change-password")
