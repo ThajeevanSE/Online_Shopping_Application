@@ -16,17 +16,19 @@ function Login() {
         password,
       });
 
-      const { token, user } = res.data;
+      const { token, role, name } = res.data;
 
-      // Save token and user info in localStorage
+     
       saveToken(token);
-      localStorage.setItem("user", JSON.stringify(user));
 
-      // Redirect based on role
-      if (user.role === "admin") {
-        navigate("/admin"); // Admin dashboard page
+      
+      localStorage.setItem("user", JSON.stringify({ name, role }));
+
+  
+      if (role.toLowerCase() === "admin") {
+        navigate("/admin"); 
       } else {
-        navigate("/dashboard"); // Normal user dashboard
+        navigate("/dashboard"); 
       }
 
     } catch (err) {

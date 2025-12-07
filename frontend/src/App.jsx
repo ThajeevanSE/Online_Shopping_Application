@@ -6,7 +6,8 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
-import Activity from "./pages/Activity";
+
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
@@ -25,6 +26,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/profile"
@@ -39,14 +48,6 @@ function App() {
           element={
             <ProtectedRoute>
               <ChangePassword />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/activity"
-          element={
-            <ProtectedRoute>
-              <Activity />
             </ProtectedRoute>
           }
         />
