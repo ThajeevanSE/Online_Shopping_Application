@@ -16,12 +16,22 @@ function Login() {
         password,
       });
 
-      saveToken(res.data.token);
-      
-      navigate("/dashboard"); 
+      const { token, user } = res.data;
+
+      // Save token and user info in localStorage
+      saveToken(token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Redirect based on role
+      if (user.role === "admin") {
+        navigate("/admin"); // Admin dashboard page
+      } else {
+        navigate("/dashboard"); // Normal user dashboard
+      }
 
     } catch (err) {
-      alert("Login failed ...");
+      alert("Login failed. Please check your email and password.");
+      console.error(err);
     }
   };
 

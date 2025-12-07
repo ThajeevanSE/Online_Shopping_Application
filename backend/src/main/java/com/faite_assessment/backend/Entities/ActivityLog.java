@@ -4,6 +4,8 @@ package com.faite_assessment.backend.Entities;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "activity_logs")
@@ -18,6 +20,7 @@ public class ActivityLog {
     private Long id;
 
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

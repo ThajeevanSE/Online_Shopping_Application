@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { getToken } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState({
     name: "",
     dateOfBirth: ""
@@ -109,6 +111,10 @@ function Profile() {
 
         <button type="submit">Update Profile</button>
       </form>
+       <br />
+      <button onClick={() => navigate("/change-password")}>
+        Change Password
+      </button>
     </div>
   );
 }

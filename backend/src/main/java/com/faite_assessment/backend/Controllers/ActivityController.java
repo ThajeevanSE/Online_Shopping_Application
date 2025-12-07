@@ -1,6 +1,6 @@
 package com.faite_assessment.backend.Controllers;
 
-import com.faite_assessment.backend.Entities.ActivityLog;
+import com.faite_assessment.backend.Dtos.ActivityLogDTO;
 import com.faite_assessment.backend.Entities.User;
 import com.faite_assessment.backend.Security.JwtUtil;
 import com.faite_assessment.backend.Services.ActivityLogService;
@@ -20,7 +20,7 @@ public class ActivityController {
     private final JwtUtil jwtUtil;
 
     @GetMapping
-    public List<ActivityLog> getUserLogs(@RequestHeader("Authorization") String authHeader) {
+    public List<ActivityLogDTO> getLogs(@RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.substring(7);
         String email = jwtUtil.extractEmail(token);
@@ -28,6 +28,12 @@ public class ActivityController {
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return activityLogService.getLogsForUser(user);
+        return activityLogService.getLogsForUser(user)
+                .stream()
+                .map(log -> new ActivityLogDTO(
+                        log.getAction(),
+                        log.getCreatedAt()
+                ))
+                .toList();
     }
 }
