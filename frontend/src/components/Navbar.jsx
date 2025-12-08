@@ -6,7 +6,10 @@ import api from "../api/axios";
 function Navbar() {
   const [userName, setUserName] = useState("");
   const [profilePic, setProfilePic] = useState("");
+  const [role, setRole] = useState(""); 
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const navigate = useNavigate();
   const token = getToken();
 
@@ -19,6 +22,8 @@ function Navbar() {
           });
           setUserName(response.data.name);
           setProfilePic(response.data.profilePicture);
+          setRole(response.data.role); 
+        
         } catch (error) {
           console.error("Failed to fetch user data", error);
         }
@@ -28,10 +33,10 @@ function Navbar() {
     } else {
       setUserName("");
       setProfilePic("");
+      setRole("");
     }
-  }, [token]);
+  }, [token, navigate]);
 
-  // If no token, hide navbar
   if (!token) return null;
 
   const handleLogout = () => {
@@ -44,52 +49,147 @@ function Navbar() {
     document.body.classList.toggle("dark-mode", !isDarkMode);
   };
 
-  // Generate image URL
   const imageUrl = profilePic
     ? `http://localhost:8080${profilePic}`
-    : "/default-avatar.png"; 
+    : "/default-avatar.png";
 
   return (
-    <nav
-      style={{
-        padding: "15px",
-        borderBottom: "1px solid #ccc",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
-      {/* Left side links */}
-      <div>
-        <Link to="/dashboard">Dashboard</Link> |{" "}
-        <Link to="/profile">Profile</Link>
+    <nav className="bg-white shadow-md border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+
+          {/* Left side */}
+          <div className="flex items-center space-x-8">
+            <Link to="/admin" className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+            </Link>
+
+            {/* Desktop Links */}
+            <div className="text-xl font-bold text-gray-800 hidden sm:block">
+              <Link
+                to="/dashboard"
+                className="px-4 py-2 text-black-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition duration-200"
+              >
+                {role === "ADMIN" ? "Admin Dashboard" : "Dashboard"}
+              </Link>
+
+              {role !== "ADMIN" && (
+                <Link
+                  to="/profile"
+                  className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition duration-200"
+                >
+                  Profile
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Right side */}
+          <div className="flex items-center space-x-4">
+            {/* Dark mode */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition duration-200"
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDarkMode ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Desktop user info */}
+            <div className="hidden md:flex items-center space-x-3">
+              <span className="text-sm font-medium text-gray-700">
+                {userName ? `Hello, ${userName}` : "Hello"}
+              </span>
+
+              <img
+                src={imageUrl}
+                alt="Profile"
+                onError={(e) => { e.target.src = "/default-avatar.png"; }}
+                className="w-10 h-10 rounded-full object-cover border-2 border-blue-500 hover:border-blue-600 transition duration-200 cursor-pointer"
+              />
+
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-semibold hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform transition duration-200 hover:scale-105"
+              >
+                Logout
+              </button>
+            </div>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition duration-200"
+            >
+              {isMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Right side user info */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <span>{userName ? `Hello, ${userName}` : "Hello"}</span>
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-gray-200 bg-white">
+          <div className="px-4 py-3 space-y-3">
+            <div className="flex items-center space-x-3 pb-3 border-b border-gray-200">
+              <img
+                src={imageUrl}
+                alt="Profile"
+                onError={(e) => { e.target.src = "/default-avatar.png"; }}
+                className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                {userName ? `Hello, ${userName}` : "Hello"}
+              </span>
+            </div>
 
-        {/* Profile Picture */}
-        <img
-  src={imageUrl}
-  alt="Profile"
-  onError={(e) => { e.target.src = "/default-avatar.png"; }}
-  style={{
-    width: "40px",
-    height: "40px",
-    borderRadius: "50%",
-    objectFit: "cover",
-    border: "2px solid #333",
-  }}
-/>
+            <Link
+              to="/dashboard"
+              onClick={() => setIsMenuOpen(false)}
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition duration-200"
+            >
+              {role === "admin" ? "Admin Dashboard" : "Dashboard"}
+            </Link>
 
+            {role !== "admin" && (
+              <Link
+                to="/profile"
+                onClick={() => setIsMenuOpen(false)}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition duration-200"
+              >
+                Profile
+              </Link>
+            )}
 
-        <button onClick={toggleDarkMode}>
-          {isDarkMode ? "Light Mode" : "Dark Mode"}
-        </button>
-
-        <button onClick={handleLogout}>Logout</button>
-      </div>
+            <button
+              onClick={handleLogout}
+              className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition duration-200"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
