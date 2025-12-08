@@ -1,16 +1,120 @@
-# React + Vite
+# Faite Assessment – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the **frontend** part of the Full Stack Assignment. It is built using **React** and provides a user-friendly interface for authentication, profile management, activity logs, and admin user management.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Technologies Used
 
-## React Compiler
+- React.js
+- Vite (Build Tool)
+- Axios
+- React Router DOM
+- Tailwind CSS / CSS
+- JWT Authentication
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 📁 Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+frontend/
+├── src/
+│ ├── assets/
+│ ├── components/
+│ ├── pages/
+│ │ ├── Login.jsx
+│ │ ├── Register.jsx
+│ │ ├── Dashboard.jsx
+│ │ ├── Profile.jsx
+│ │ ├── ActivityLogs.jsx
+│ │ └── AdminUsers.jsx
+│ ├── services/
+│ │ └── api.js
+│ ├── App.jsx
+│ └── main.jsx
+├── public/
+├── index.html
+├── package.json
+└── vite.config.js
+
+yaml
+Copy code
+
+---
+
+## ⚙️ Installation & Setup
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/ThajeevanSE/Faite_Assessment.git
+cd Faite_Assessment/frontend
+Install dependencies
+
+bash
+Copy code
+npm install
+
+
+
+
+Copy code
+VITE_API_BASE_URL=http://localhost:8080
+
+
+▶️ Running the Project
+To start the development server:
+
+bash
+Copy code
+npm run dev
+The app will be available at:
+
+arduino
+Copy code
+http://localhost:5173
+
+🔐 Features Implemented
+User Registration
+
+User Login with JWT
+
+Protected Dashboard
+
+Profile Editing (Name, Profile Picture, DOB)
+
+Password Change
+
+Activity Logs
+
+Role-Based Access (Admin Panel)
+
+Dark Mode (Saved in localStorage)
+
+Responsive UI (Desktop / Tablet / Mobile)
+
+📸 Demo Flow
+The demo video covers:
+
+User Registration
+
+Login
+
+Dashboard
+
+Profile Update
+
+Activity Logs
+
+Admin User Management
+
+📦 Build for Production
+To create a production build:
+
+bash
+Copy code
+npm run build
+Output will be generated inside the dist folder.
+
+🧑‍💻 Author
+Thajeevan Vasanthakumar
