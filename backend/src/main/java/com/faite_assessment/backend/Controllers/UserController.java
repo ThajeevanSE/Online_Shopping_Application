@@ -24,7 +24,7 @@ public class UserController {
     private final BCryptPasswordEncoder passwordEncoder;
     private final ActivityLogService activityLogService;
 
-    //GET LOGGED-IN USER
+
     @GetMapping("/me")
     public User getLoggedInUser(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
@@ -34,7 +34,7 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    //UPDATE PROFILE
+
     @PutMapping("/update")
     public User updateProfile(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
@@ -66,13 +66,13 @@ public class UserController {
 
         if (file != null && !file.isEmpty()) {
 
-            // Allow only images
+
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 throw new RuntimeException("Only image files are allowed");
             }
 
-            // Safe project root folder
+
             String uploadBase = System.getProperty("user.dir");
             String folder = uploadBase + File.separator + "uploads" + File.separator + "profile_pictures";
 
@@ -81,7 +81,7 @@ public class UserController {
                 dir.mkdirs();
             }
 
-            // Clean and safe filename
+
             String original = file.getOriginalFilename().replaceAll("[^a-zA-Z0-9._-]", "");
             String fileName = user.getId() + "_" + System.currentTimeMillis() + "_" + original;
 
@@ -89,7 +89,7 @@ public class UserController {
 
             file.transferTo(new File(filePath));
 
-            // Save public path
+
             user.setProfilePicture("/uploads/profile_pictures/" + fileName);
         }
 

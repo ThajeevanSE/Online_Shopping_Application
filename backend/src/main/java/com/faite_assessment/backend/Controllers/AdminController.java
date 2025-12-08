@@ -18,10 +18,9 @@ public class AdminController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    //Admin check helper
-    // AdminController.java (improved)
+
     private void ensureAdmin(String token) {
-        // defensive
+
         if (token == null || token.isBlank()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No token provided");
         }
@@ -43,11 +42,11 @@ public class AdminController {
         System.out.println("[ADMIN CHECK] user role: " + user.getRole());
 
         if (!"ADMIN".equalsIgnoreCase(user.getRole().name())) {
-            // return a clear 403
+
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: Admin only");
         }
     }
-    //Get all users
+
     @GetMapping("/users")
     public List<User> getAllUsers(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
@@ -56,7 +55,7 @@ public class AdminController {
         return userService.getAllUsers();
     }
 
-    //Delete user by ID
+
     @DeleteMapping("/users/{id}")
     public String deleteUser(@RequestHeader("Authorization") String authHeader,
                              @PathVariable Long id) {

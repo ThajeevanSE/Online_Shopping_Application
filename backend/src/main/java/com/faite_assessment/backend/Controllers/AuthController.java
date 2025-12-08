@@ -29,7 +29,7 @@ public class AuthController {
             return "Email already exists";
         }
 
-        // Encode password
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(Role.USER);
 
@@ -40,7 +40,7 @@ public class AuthController {
         return "Registration successful";
     }
 
-    // LOGIN API
+
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody Map<String, String> loginData) {
 
