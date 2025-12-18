@@ -3,6 +3,7 @@ package com.faite_assessment.backend.Services;
 import com.faite_assessment.backend.Dtos.ProductRequestDTO;
 import com.faite_assessment.backend.Entities.Product;
 import com.faite_assessment.backend.Entities.User;
+import com.faite_assessment.backend.Models.Category;
 import com.faite_assessment.backend.Repositories.ProductRepository;
 import com.faite_assessment.backend.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +57,17 @@ public class ProductService {
         product.setSaleStatus(dto.getSaleStatus());
 
         return productRepository.save(product);
+    }
+    // ... inside ProductService class
+
+    // Fetch all available products with filters
+    public List<Product> getAllProducts(String keyword, Category category) {
+        return productRepository.searchProducts(keyword, category);
+    }
+
+    // Fetch single product details (Public view)
+    public Product getProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 }

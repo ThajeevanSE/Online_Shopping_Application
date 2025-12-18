@@ -2,9 +2,9 @@ package com.faite_assessment.backend.Controllers;
 
 import com.faite_assessment.backend.Dtos.ProductRequestDTO;
 import com.faite_assessment.backend.Entities.Product;
+import com.faite_assessment.backend.Models.Category;
 import com.faite_assessment.backend.Services.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType; // Correct Import
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,7 @@ public class ProductController {
 
         String email = authentication.getName();
 
-        // Ensure the directory exists
+
         Path uploadPath = Paths.get("uploads");
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
@@ -55,5 +55,29 @@ public class ProductController {
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO dto, Authentication authentication) {
         String email = authentication.getName();
         return ResponseEntity.ok(productService.updateProduct(id, dto, email));
+    }
+   
+    @GetMapping("/browse")
+    public ResponseEntity<List<Product>> browseProducts(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category) {
+
+        // Convert string category to Enum safely
+        Category catEnum = null;
+        if (category != null && !category.isEmpty()) {
+            try {
+                catEnum = Category.valueOf(category.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // If invalid category passed, ignore it or handle error
+            }
+        }
+
+        return ResponseEntity.ok(productService.getAllProducts(search, catEnum));
+    }
+
+    // Single Product Detail View
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 }

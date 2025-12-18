@@ -10,7 +10,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import { DarkModeProvider } from "./context/DarkModeContext";
 import MyProducts from "./pages/MyProducts";
 import ProductForm from "./pages/ProductForm";
-
+import Shopping from "./pages/Shopping";
+import ProductDetails from "./pages/ProductDetails";
 
 function App() {
   return (
@@ -87,7 +88,22 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+<Route
+            path="/shopping"
+            element={
+              <ProtectedRoute>
+                <Shopping />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product/:id"
+            element={
+              <ProtectedRoute>
+                <ProductDetails />
+              </ProtectedRoute>
+            }
+          />
 
 
         </Routes>

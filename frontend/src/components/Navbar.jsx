@@ -81,35 +81,47 @@ function Navbar() {
               <Link
                 to="/dashboard"
                 className={`px-4 py-2 rounded-lg font-medium transition duration-200 ${isDarkMode
-                    ? "text-white hover:bg-gray-800"
-                    : "text-gray-800 hover:bg-blue-50 hover:text-blue-600"
+                  ? "text-white hover:bg-gray-800"
+                  : "text-gray-800 hover:bg-blue-50 hover:text-blue-600"
                   }`}
               >
                 {role === "admin" ? "Admin Dashboard" : "Dashboard"}
               </Link>
 
-              {role !== "admin" && (
+             
                 <Link
                   to="/profile"
                   className={`px-4 py-2 rounded-lg font-medium transition duration-200 ${isDarkMode
-                      ? "text-white hover:bg-gray-800"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                    ? "text-white hover:bg-gray-800"
+                    : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                     }`}
                 >
                   Profile
                 </Link>
-              )}
+              
               {role !== "admin" && (
                 <Link
                   to="/my-products"
                   className={`px-4 py-2 rounded-lg font-medium transition duration-200 ${isDarkMode
-                      ? "text-white hover:bg-gray-800"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                    ? "text-white hover:bg-gray-800"
+                    : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                     }`}
                 >
                   Add Products
                 </Link>
               )}
+              {role !== "admin" && (
+                <Link
+                  to="/shopping"
+                  className={`px-4 py-2 rounded-lg font-medium transition duration-200 ${isDarkMode
+                      ? "text-white hover:bg-gray-800"
+                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                    }`}
+                >
+                  Shopping
+                </Link>
+              )}
+
 
             </div>
           </div>
@@ -120,8 +132,8 @@ function Navbar() {
             <button
               onClick={toggleDarkMode}
               className={`p-2 rounded-lg transition duration-200 ${isDarkMode
-                  ? "text-yellow-300 hover:bg-gray-700"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "text-yellow-300 hover:bg-gray-700"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
               title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
