@@ -12,6 +12,7 @@ import MyProducts from "./pages/MyProducts";
 import ProductForm from "./pages/ProductForm";
 import Shopping from "./pages/Shopping";
 import ProductDetails from "./pages/ProductDetails";
+import Favorites from "./pages/Favorites";
 
 function App() {
   return (
@@ -88,7 +89,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-<Route
+          <Route
             path="/shopping"
             element={
               <ProtectedRoute>
@@ -104,6 +105,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/favorites"
+            element={
+              <ProtectedRoute>
+                <Favorites />
+              </ProtectedRoute>
+            }
+          />
+
 
 
         </Routes>

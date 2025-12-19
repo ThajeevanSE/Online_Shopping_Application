@@ -48,6 +48,15 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_favorites",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    @ToString.Exclude
+    private List<Product> favoriteProducts;
+
     @PreUpdate
     public void onUpdate() {
         updatedAt = LocalDateTime.now();

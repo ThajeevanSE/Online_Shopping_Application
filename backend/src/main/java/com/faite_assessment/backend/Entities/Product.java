@@ -3,6 +3,7 @@ package com.faite_assessment.backend.Entities;
 import com.faite_assessment.backend.Models.Category;
 import com.faite_assessment.backend.Models.ProductCondition;
 import com.faite_assessment.backend.Models.SaleStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -39,6 +40,7 @@ public class Product {
     private String phoneNum;
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     private LocalDateTime createdAt;

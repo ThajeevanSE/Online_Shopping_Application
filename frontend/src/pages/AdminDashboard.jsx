@@ -83,8 +83,7 @@ function AdminDashboard() {
     }
   };
 
-  // Prepare Data for Charts
-  // Convert [["Category", Count]] to [{name: "Category", value: Count}]
+  // Prepare data for charts
   const chartData = stats.categoryStats?.map(item => ({
     name: item[0],
     value: item[1]

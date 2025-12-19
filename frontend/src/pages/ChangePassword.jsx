@@ -5,13 +5,13 @@
 
     function ChangePassword() {
     const navigate = useNavigate();
-    // State variables from your current (API) and old (styled) code
+    
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState(""); // From old code
-    const [showOldPassword, setShowOldPassword] = useState(false); // From old code
-    const [showNewPassword, setShowNewPassword] = useState(false); // Used for both new and confirm fields
-    const [isLoading, setIsLoading] = useState(false); // From old code
+    const [confirmPassword, setConfirmPassword] = useState(""); 
+    const [showOldPassword, setShowOldPassword] = useState(false); 
+    const [showNewPassword, setShowNewPassword] = useState(false); 
+    const [isLoading, setIsLoading] = useState(false); 
 
     const handleChangePassword = async (e) => {
         e.preventDefault();
@@ -27,7 +27,7 @@
         try {
         const token = getToken();
 
-        // 2. Real API call (from current code)
+        
         await api.put(
             "/user/change-password",
             {
@@ -41,10 +41,10 @@
             }
         );
 
-        // 3. Success handling
+        
         alert("Password updated successfully ..");
 
-        // Redirect to dashboard with a success message (from current code)
+     
         navigate("/dashboard", {
             state: { message: "Password changed successfully ..." },
         });
