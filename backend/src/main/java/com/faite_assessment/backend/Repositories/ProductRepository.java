@@ -17,4 +17,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "ORDER BY p.createdAt DESC")
     List<Product> searchProducts(@Param("keyword") String keyword, @Param("category") Category category);
+    @Query("SELECT p.category, COUNT(p) FROM Product p GROUP BY p.category")
+    List<Object[]> getCategoryStats();
 }

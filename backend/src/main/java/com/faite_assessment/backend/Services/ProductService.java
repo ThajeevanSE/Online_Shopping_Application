@@ -85,7 +85,25 @@ public class ProductService {
 
         productRepository.delete(product);
 
-        // Optional: You could add logic here to delete the image file from the 'uploads' folder
-        // to save space, but for now, database deletion is sufficient.
+
+    }
+    // Inside ProductService.java
+
+    // For Admin: Get ALL products in the system
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+    // For Admin: Delete ANY product by ID (Bypasses ownership check)
+    public void adminDeleteProduct(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new RuntimeException("Product not found");
+        }
+        productRepository.deleteById(id);
+    }
+
+    // For Admin: Get Stats
+    public List<Object[]> getProductStats() {
+        return productRepository.getCategoryStats();
     }
 }
