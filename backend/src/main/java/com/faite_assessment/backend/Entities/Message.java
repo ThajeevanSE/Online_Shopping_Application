@@ -21,13 +21,16 @@ public class Message {
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
 
-    // Optional: Link the message to a specific product for context
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
     @Column(nullable = false, length = 1000)
     private String content;
+
+    @Column(nullable = false)
+    private boolean isRead = false;
 
     private LocalDateTime timestamp;
 

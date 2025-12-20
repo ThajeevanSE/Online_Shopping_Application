@@ -13,6 +13,24 @@ function Navbar() {
 
   const navigate = useNavigate();
   const token = getToken();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (token) {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 5000); // Poll every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [token]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await api.get("/messages/unread-count");
+      setUnreadCount(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     if (token) {
@@ -125,17 +143,20 @@ function Navbar() {
                 </Link>
               )}
               {role !== "admin" && (
-                <Link
-                  to="/inbox"
-                  className={`px-4 py-2 rounded-lg font-medium transition duration-200 ${isDarkMode
-                    ? "text-white hover:bg-gray-800"
-                    : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                    }`}
-                >
-                  Messages
-                </Link>
-              )}
-
+  <Link
+    to="/messages"
+    className={`relative px-4 py-2 rounded-lg font-medium transition duration-200 ${
+      isDarkMode ? "text-white hover:bg-gray-800" : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+    }`}
+  >
+    Messages
+    {unreadCount > 0 && (
+      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm animate-pulse">
+        {unreadCount}
+      </span>
+    )}
+  </Link>
+)}
             </div>
           </div>
 

@@ -3,15 +3,15 @@ import { useParams } from "react-router-dom";
 import api from "../api/axios";
 
 function Chat() {
-  const { userId } = useParams(); // ID of the person we are chatting with
+  const { userId } = useParams(); 
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const bottomRef = useRef(null);
-  const currentUserId = 1; // You need to decode this from your JWT token in a real app
+  const currentUserId = 1;
 
   useEffect(() => {
     fetchMessages();
-    // Optional: Polling every 3 seconds to get new messages
+    
     const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [userId]);

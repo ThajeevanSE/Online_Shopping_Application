@@ -15,6 +15,7 @@ import ProductDetails from "./pages/ProductDetails";
 import Favorites from "./pages/Favorites";
 import Chat from "./pages/Chat";
 import Inbox from "./pages/Inbox";
+import Messenger from "./pages/Messenger";
 
 function App() {
   return (
@@ -133,6 +134,11 @@ function App() {
             }
           />
 
+          <Route path="/messages" 
+          element={
+          <ProtectedRoute>
+            <Messenger />
+            </ProtectedRoute>} />
 
 
         </Routes>

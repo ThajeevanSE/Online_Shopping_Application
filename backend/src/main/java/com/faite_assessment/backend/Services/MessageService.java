@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet; // Import LinkedHashSet
 import java.util.List;
 import java.util.Set;
 
@@ -47,20 +47,30 @@ public class MessageService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return messageRepository.findConversation(email1, user2.getEmail());
     }
-    public List<User> getInbox(String myEmail) {
-        // 1. Get all messages I'm involved in
-        List<Message> messages = messageRepository.findAllBySenderEmailOrReceiverEmail(myEmail, myEmail);
 
-        // 2. Extract unique partners
-        Set<User> partners = new HashSet<>();
+    public List<User> getInbox(String myEmail) {
+        // 1. Get messages ordered by NEWEST first
+        List<Message> messages = messageRepository.findAllBySenderEmailOrReceiverEmailOrderByTimestampDesc(myEmail, myEmail);
+
+        // 2. Extract unique partners using LinkedHashSet to maintain order
+        Set<User> partners = new LinkedHashSet<>();
+
         for (Message m : messages) {
             if (m.getSender().getEmail().equals(myEmail)) {
-                partners.add(m.getReceiver()); // I sent it, so add the receiver
+                partners.add(m.getReceiver());
             } else {
-                partners.add(m.getSender());   // They sent it, so add the sender
+                partners.add(m.getSender());
             }
         }
 
         return new ArrayList<>(partners);
+    }
+
+    public long getUnreadCount(String email) {
+        return messageRepository.countByReceiverEmailAndIsReadFalse(email);
+    }
+
+    public void markAsRead(Long senderId, String myEmail) {
+        messageRepository.markMessagesAsRead(senderId, myEmail);
     }
 }
