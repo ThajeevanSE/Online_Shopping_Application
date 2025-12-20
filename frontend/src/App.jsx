@@ -16,6 +16,7 @@ import Favorites from "./pages/Favorites";
 import Chat from "./pages/Chat";
 import Inbox from "./pages/Inbox";
 import Messenger from "./pages/Messenger";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* USER DASHBOARD */}
           <Route
@@ -139,6 +141,8 @@ function App() {
           <ProtectedRoute>
             <Messenger />
             </ProtectedRoute>} />
+
+            
 
 
         </Routes>

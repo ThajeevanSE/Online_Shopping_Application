@@ -35,20 +35,16 @@ public class User {
     private Role role = Role.USER;
 
     private String profilePicture;
-
     private LocalDate dateOfBirth;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
+
+
+    private String otp;
+    private LocalDateTime otpGeneratedTime;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActivityLog> activityLogs;
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
 
     @ManyToMany
     @JoinTable(
@@ -59,12 +55,18 @@ public class User {
     @ToString.Exclude
     private List<Product> favoriteProducts;
 
+    @PrePersist
+    public void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
     @PreUpdate
     public void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
     public boolean isAdmin() {
         return this.role == Role.ADMIN;
     }
-
 }
