@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # The Database Service
+  mysql_db:
+    image: mysql:8.0
+    container_name: faite_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: faite_assessment
+    ports:
+      - "3307:3306" 
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Spring Boot Backend
+  backend:
+    build: ./backend 
+    container_name: faite_backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql_db 
+    environment:
+      # NETWORK
+      DB_URL: jdbc:mysql://mysql_db:3306/faite_assessment
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      # Email credentials 
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+volumes:
+  mysql_data:
