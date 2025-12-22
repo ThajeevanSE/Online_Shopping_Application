@@ -8,10 +8,11 @@ function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Messaging State
+
   const [messageText, setMessageText] = useState("");
   const [showChatBox, setShowChatBox] = useState(false);
 
+  
   const IMAGE_BASE_URL = "http://localhost:8080";
 
   useEffect(() => {
@@ -21,31 +22,40 @@ function ProductDetails() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Function to handle sending the message
+  
   const handleSendMessage = async () => {
     if (!messageText.trim()) return;
 
     const token = localStorage.getItem("token");
     if (!token) {
-        alert("Please log in to send a message.");
-        navigate("/");
+      alert("Please log in to send a message.");
+      navigate("/"); 
+      return;
+    }
+
+  
+    if (!product?.user?.id) {
+        alert("Cannot contact seller: Seller information missing.");
         return;
     }
 
     try {
-        await api.post("/messages/send", {
-            receiverId: product.user?.id, // Assumes product.user.id is available from backend
-            productId: product.id,
-            content: messageText
-        });
-        alert("Message sent successfully!");
-        setMessageText("");
-        setShowChatBox(false);
+      await api.post("/messages/send", {
+        receiverId: product.user.id,
+        productId: product.id,
+        content: messageText
+      });
+
+      alert("Message sent successfully!");
+      setShowChatBox(false);
+      setMessageText("");
+
+      navigate("/messages"); 
+      
     } catch (error) {
-        console.error("Failed to send message", error);
-        alert("Failed to send message. Please try again.");
+      console.error("Failed to send message", error);
+      alert("Failed to send message. Please try again.");
     }
-    navigate(`/chat/${product.user.id}`);
   };
 
   if (loading) return <div className="text-center p-10">Loading details...</div>;
@@ -56,15 +66,15 @@ function ProductDetails() {
       <button onClick={() => navigate(-1)} className="mb-6 text-indigo-600 hover:underline font-medium">
         ← Back to Shopping
       </button>
-      
+
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2">
         {/* Image Section */}
         <div className="h-96 md:h-auto bg-gray-100">
-          <img 
-             src={product.imageUrl ? `${IMAGE_BASE_URL}${product.imageUrl}` : "/placeholder-product.png"}
-             alt={product.title}
-             className="w-full h-full object-cover"
-             onError={(e) => { e.target.src = "/placeholder-product.png"; }}
+          <img
+            src={product.imageUrl ? `${IMAGE_BASE_URL}${product.imageUrl}` : "/placeholder-product.png"}
+            alt={product.title}
+            className="w-full h-full object-cover"
+            onError={(e) => { e.target.src = "/placeholder-product.png"; }}
           />
         </div>
 
@@ -81,17 +91,17 @@ function ProductDetails() {
 
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">{product.title}</h1>
           <p className="text-3xl font-bold text-indigo-600 mb-6">${product.price}</p>
-          
+
           {/* Seller Contact Info Display */}
           <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
             <h3 className="text-sm font-bold text-gray-500 uppercase mb-1">Seller Contact</h3>
             <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <span className="text-lg font-semibold text-gray-800">
-                    {product.phoneNum || "No contact number provided"}
-                </span>
+              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span className="text-lg font-semibold text-gray-800">
+                {product.phoneNum || "No contact number provided"}
+              </span>
             </div>
           </div>
 
@@ -101,46 +111,46 @@ function ProductDetails() {
           </div>
 
           <div className="space-y-3">
-              {/* Call Button */}
-              {product.phoneNum ? (
-                <a 
-                    href={`tel:${product.phoneNum}`} 
-                    className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-[1.02]"
-                >
-                    Call Seller Now
-                </a>
-              ) : (
-                <button disabled className="w-full bg-gray-300 text-gray-500 font-bold py-4 rounded-xl cursor-not-allowed">
-                    Contact Unavailable
-                </button>
-              )}
-
-              {/* Message Button */}
-              <button 
-                  onClick={() => setShowChatBox(!showChatBox)}
-                  className="w-full bg-white border-2 border-indigo-600 text-indigo-600 font-bold py-4 rounded-xl hover:bg-indigo-50 transition transform hover:scale-[1.02]"
+            {/* Call Button */}
+            {product.phoneNum ? (
+              <a
+                href={`tel:${product.phoneNum}`}
+                className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-[1.02]"
               >
-                 {showChatBox ? "Cancel Message" : "Message Seller"}
+                Call Seller Now
+              </a>
+            ) : (
+              <button disabled className="w-full bg-gray-300 text-gray-500 font-bold py-4 rounded-xl cursor-not-allowed">
+                Contact Unavailable
               </button>
+            )}
 
-              {/* Chat Input Box */}
-              {showChatBox && (
-                  <div className="p-4 bg-gray-50 rounded-xl border border-indigo-100 shadow-inner">
-                      <textarea 
-                          className="w-full p-3 border rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" 
-                          placeholder="Hi, is this still available?"
-                          rows="3"
-                          value={messageText}
-                          onChange={(e) => setMessageText(e.target.value)}
-                      />
-                      <button 
-                          onClick={handleSendMessage}
-                          className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition"
-                      >
-                          Send Message
-                      </button>
-                  </div>
-              )}
+            {/* Message Button */}
+            <button
+              onClick={() => setShowChatBox(!showChatBox)}
+              className="w-full bg-white border-2 border-indigo-600 text-indigo-600 font-bold py-4 rounded-xl hover:bg-indigo-50 transition transform hover:scale-[1.02]"
+            >
+              {showChatBox ? "Cancel Message" : "Message Seller"}
+            </button>
+
+            {/* Chat Input Box */}
+            {showChatBox && (
+              <div className="p-4 bg-gray-50 rounded-xl border border-indigo-100 shadow-inner">
+                <textarea
+                  className="w-full p-3 border rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  placeholder="Hi, is this still available?"
+                  rows="3"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                />
+                <button
+                  onClick={handleSendMessage}
+                  className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition"
+                >
+                  Send Message
+                </button>
+              </div>
+            )}
           </div>
 
         </div>

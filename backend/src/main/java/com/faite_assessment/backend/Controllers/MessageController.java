@@ -24,15 +24,14 @@ public class MessageController {
 
     @Data
     public static class MessageRequest {
-        // removed senderEmail because we get it from Principal now (Secure)
         private Long receiverId;
+        private Long productId;
         private String content;
     }
 
-    // --- WEBSOCKET ---
+    // WEBSOCKET
     @MessageMapping("/chat")
     public void processMessage(@Payload MessageRequest request, Principal principal) {
-        // principal is now NOT NULL thanks to WebSocketConfig interceptor
         String senderEmail = principal.getName();
 
         Message savedMsg = messageService.sendMessage(
@@ -42,14 +41,12 @@ public class MessageController {
                 request.getContent()
         );
 
-        // Send to Receiver
         messagingTemplate.convertAndSendToUser(
                 savedMsg.getReceiver().getEmail(),
                 "/queue/messages",
                 savedMsg
         );
 
-        // Send back to Sender (so it appears on their screen too if using multiple devices)
         messagingTemplate.convertAndSendToUser(
                 senderEmail,
                 "/queue/messages",
@@ -57,7 +54,7 @@ public class MessageController {
         );
     }
 
-    // --- REST API ---
+    // REST API
 
     @GetMapping("/api/messages/conversation/{userId}")
     public ResponseEntity<List<Message>> getConversation(@PathVariable Long userId, Authentication authentication) {
@@ -78,5 +75,25 @@ public class MessageController {
     public ResponseEntity<Void> markAsRead(@PathVariable Long senderId, Authentication authentication) {
         messageService.markAsRead(senderId, authentication.getName());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/api/messages/send")
+    public ResponseEntity<Message> sendMessageRest(@RequestBody MessageRequest request, Principal principal) {
+        String senderEmail = principal.getName();
+        
+        Message savedMsg = messageService.sendMessage(
+                senderEmail,
+                request.getReceiverId(),
+                request.getProductId(),
+                request.getContent()
+        );
+
+        messagingTemplate.convertAndSendToUser(
+                savedMsg.getReceiver().getEmail(),
+                "/queue/messages",
+                savedMsg
+        );
+
+        return ResponseEntity.ok(savedMsg);
     }
 }

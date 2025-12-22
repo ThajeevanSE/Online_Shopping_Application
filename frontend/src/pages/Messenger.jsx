@@ -12,8 +12,7 @@ function Messenger() {
 
   const bottomRef = useRef(null);
   const stompClientRef = useRef(null);
-  // We use a ref to track activeChat inside the socket callback
-  // because the callback is defined once and won't see state updates otherwise.
+
   const activeChatRef = useRef(null); 
 
   // Sync ref with state
@@ -34,7 +33,7 @@ function Messenger() {
     stompClient.connect(
       { Authorization: `Bearer ${token}` },
       () => {
-        // SUCCESS: Subscribe to my private queue
+        
         stompClient.subscribe("/user/queue/messages", (payload) => {
           const newMessage = JSON.parse(payload.body);
           handleIncomingMessage(newMessage);
