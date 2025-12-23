@@ -13,6 +13,7 @@ Built with **Spring Boot** (Backend) and **React.js** (Frontend).
 * ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white) **Spring Boot 3** (Web, Data JPA, Security, WebSocket)
 * ![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white) **MySQL Database**
 * **JWT** (JSON Web Tokens) for Authentication
+* Stripe API for Payment Processing
 * **Lombok** for boilerplate reduction
 
 ### Frontend
@@ -30,6 +31,7 @@ Built with **Spring Boot** (Backend) and **React.js** (Frontend).
 * Secure User Registration & Login.
 * Role-based access control (User vs Admin).
 * JWT-based stateless authentication.
+* Forgot Password: Secure OTP-based password reset flow via Email (JavaMailSender).
 
 ### 🛍️ Marketplace Functionality
 * **Product Management:** Users can add, edit, and delete their own products.
@@ -40,11 +42,20 @@ Built with **Spring Boot** (Backend) and **React.js** (Frontend).
 * **Favorites:** Users can "Heart" items to save them for later.
 * **Many-to-Many Relationship:** Efficient database mapping for user favorites.
 
+### 📦 Orders & Payments
+* Checkout System: Integrated order form with address and contact details.
+* Online Payments: Secure credit card processing using Stripe Payment Intents.
+* Cash on Delivery (COD): Option to pay upon arrival.
+* *Order Tracking: Sellers can view incoming orders and manage shipping status.
+
 ### 💬 Real-Time Chat System (WebSocket)
 * **Instant Messaging:** Chat with sellers instantly without refreshing the page.
 * **WhatsApp-Style UI:** Split-screen layout, read receipts (simulated), and bubble interface.
 * **Inbox Management:** See a list of all active conversations.
 * **Notifications:** Real-time unread message counter in the navigation bar.
+* Instant Chat: WhatsApp-style messaging between Buyers and Sellers using WebSockets
+* Green Popup Toasts appear instantly when a user receives a new order or message.
+    Unread Badge: Real-time counter on the Navbar for unread messages.
 
 ### 👑 Admin Dashboard (Management Console)
 * **Analytics Overview:** Visual dashboard displaying key metrics like Total Users, Active Products, and Total Sales Revenue.
@@ -80,7 +91,7 @@ Built with **Spring Boot** (Backend) and **React.js** (Frontend).
     <td width="50%">
       <h3 align="center">User Dashboard</h3>
       <div align="center">
-        <img src="https://github.com/user-attachments/assets/779c709f-9199-48fc-b80c-9cb1bd32c124" width="100%" alt="User Dashboard">
+        <img width="960" height="472" alt="Screenshot 2025-12-23 184821" src="https://github.com/user-attachments/assets/9f44b744-3e9b-4ae2-8239-6dabdc1efeb0" />
       </div>
     </td>
     <td width="50%">
@@ -127,6 +138,24 @@ Built with **Spring Boot** (Backend) and **React.js** (Frontend).
     </td>
   </tr>
 </table>
+### 📦 Orders & Payments
+<table>
+  <tr>
+    <td width="50%">
+      <h3 align="center">Order Page</h3>
+      <div align="center">
+        <img src="https://github.com/user-attachments/assets/c03aa57d-a848-4a95-b492-ee771b99e847" width="100%" alt="Order Page">
+      </div>
+    </td>
+    <td width="50%">
+      <h3 align="center">Payment Integration</h3>
+      <div align="center">
+        <img src="https://github.com/user-attachments/assets/93fc0371-5715-4e01-a46c-0d78b571e637" width="100%" alt="Payment Modal">
+      </div>
+    </td>
+  </tr>
+</table>
+
 
 ### 💬 Interactive Features
 <table>
