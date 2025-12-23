@@ -1,8 +1,12 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { logout, getToken } from "../services/authService";
 import api from "../api/axios";
 import { DarkModeContext } from "../context/DarkModeContext";
+
+// --- 1. Import WebSocket Libraries ---
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
 
 function Navbar() {
   const [userName, setUserName] = useState("");
@@ -15,12 +19,50 @@ function Navbar() {
   const token = getToken();
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // --- 2. New State for Notifications ---
+  const [notification, setNotification] = useState(null);
+  const stompClientRef = useRef(null);
+
+  // Existing Polling for Unread Messages
   useEffect(() => {
     if (token) {
       fetchUnreadCount();
       const interval = setInterval(fetchUnreadCount, 5000); // Poll every 5 seconds
       return () => clearInterval(interval);
     }
+  }, [token]);
+
+  // --- 3. WebSocket Connection for Order Notifications ---
+  useEffect(() => {
+    if (!token) return;
+
+    // Connect to WebSocket
+    const socket = new SockJS("http://localhost:8080/ws");
+    const client = Stomp.over(socket);
+    client.debug = null; // Disable debug logs
+
+    client.connect(
+      { Authorization: `Bearer ${token}` },
+      () => {
+        // Subscribe to Notifications (e.g. "New Order Received!")
+        client.subscribe("/user/queue/notifications", (payload) => {
+          setNotification(payload.body);
+          
+          // Hide popup automatically after 5 seconds
+          setTimeout(() => setNotification(null), 5000);
+        });
+      },
+      (err) => console.error("Navbar Socket Error:", err)
+    );
+
+    stompClientRef.current = client;
+
+    // Cleanup on unmount
+    return () => {
+      if (client && client.connected) {
+        client.disconnect();
+      }
+    };
   }, [token]);
 
   const fetchUnreadCount = async () => {
@@ -55,12 +97,16 @@ function Navbar() {
     }
   }, [token]);
 
-  if (!token) return null;
-
   const handleLogout = () => {
+    // Disconnect socket on logout
+    if (stompClientRef.current) {
+        stompClientRef.current.disconnect();
+    }
     logout();
     navigate("/");
   };
+
+  if (!token) return null;
 
   const imageUrl = profilePic
     ? `http://localhost:8080${profilePic}`
@@ -71,12 +117,27 @@ function Navbar() {
       className={`${isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-800"
         } shadow-md border-b border-gray-200 sticky top-0 z-50 transition-colors duration-300`}
     >
+      
+      {/* --- 4. Notification Popup Toast --- */}
+      {notification && (
+        <div className="fixed top-20 right-5 bg-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 animate-bounce flex items-center space-x-3 border border-green-500">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <div>
+            <h4 className="font-bold text-lg">New Notification</h4>
+            <p className="text-sm font-medium">{notification}</p>
+          </div>
+          <button onClick={() => setNotification(null)} className="ml-4 hover:text-gray-200 font-bold text-xl">✕</button>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Left side */}
           <div className="flex items-center space-x-8">
-            <Link to="/admin" className="flex items-center space-x-2">
+            <Link to={role === "admin" ? "/admin" : "/dashboard"} className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-white"
@@ -105,9 +166,6 @@ function Navbar() {
               >
                 {role === "admin" ? "Admin Dashboard" : "Dashboard"}
               </Link>
-
-
-
 
               {role !== "admin" && (
                 <Link
@@ -143,20 +201,32 @@ function Navbar() {
                 </Link>
               )}
               {role !== "admin" && (
+                <Link
+                  to="/messages"
+                  className={`relative px-4 py-2 rounded-lg font-medium transition duration-200 ${isDarkMode ? "text-white hover:bg-gray-800" : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                    }`}
+                >
+                  Messages
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm animate-pulse">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+              {role !== "admin" && (
   <Link
-    to="/messages"
-    className={`relative px-4 py-2 rounded-lg font-medium transition duration-200 ${
-      isDarkMode ? "text-white hover:bg-gray-800" : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+    to="/incoming-orders"
+    className={`px-4 py-2 rounded-lg font-medium transition duration-200 ${
+      isDarkMode
+        ? "text-white hover:bg-gray-800"
+        : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
     }`}
   >
-    Messages
-    {unreadCount > 0 && (
-      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm animate-pulse">
-        {unreadCount}
-      </span>
-    )}
+    My Sales
+    {/* Optional: Add a red dot if you want to notify them of new sales later */}
   </Link>
-)}
+)}  
             </div>
           </div>
 
@@ -293,7 +363,7 @@ function Navbar() {
             )}
             {role !== "admin" && (
               <Link
-                to="/inbox"
+                to="/messages"
                 onClick={() => setIsMenuOpen(false)}
                 className="block w-full text-left px-4 py-2 rounded-lg font-medium hover:bg-blue-50 hover:text-blue-600 transition duration-200"
               >

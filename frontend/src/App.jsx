@@ -18,6 +18,8 @@ import Inbox from "./pages/Inbox";
 import Messenger from "./pages/Messenger";
 import ForgotPassword from "./pages/ForgotPassword";
 import OrderPage from "./pages/OrderPage";
+import IncomingOrders from "./pages/IncomingOrders";
+
 
 function App() {
   return (
@@ -149,6 +151,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <OrderPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/incoming-orders"
+            element={
+              <ProtectedRoute>
+                <IncomingOrders />
               </ProtectedRoute>
             }
           />
