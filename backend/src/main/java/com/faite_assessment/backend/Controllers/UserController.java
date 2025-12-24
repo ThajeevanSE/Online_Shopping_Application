@@ -5,9 +5,11 @@ import com.faite_assessment.backend.Security.JwtUtil;
 import com.faite_assessment.backend.Services.ActivityLogService;
 import com.faite_assessment.backend.Services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.Authentication;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,5 +128,10 @@ public class UserController {
         activityLogService.log(user, "Password changed");
 
         return "Password updated successfully";
+    }
+
+    @GetMapping("/dashboard-stats")
+    public ResponseEntity<com.faite_assessment.backend.Dtos.DashboardStats> getDashboardStats(Authentication authentication) {
+        return ResponseEntity.ok(userService.getUserStats(authentication.getName()));
     }
 }

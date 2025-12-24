@@ -19,4 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> searchProducts(@Param("keyword") String keyword, @Param("category") Category category);
     @Query("SELECT p.category, COUNT(p) FROM Product p GROUP BY p.category")
     List<Object[]> getCategoryStats();
+
+    // Count how many products I currently have listed
+    long countByUserEmail(String email);
 }

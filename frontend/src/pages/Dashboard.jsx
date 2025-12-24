@@ -1,347 +1,220 @@
 import { useEffect, useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
-import { getToken } from "../services/authService";
-import { useLocation } from "react-router-dom";
 import { DarkModeContext } from "../context/DarkModeContext";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
-  const [showLogs, setShowLogs] = useState(false);
-  const [logs, setLogs] = useState([]);
-  const location = useLocation();
-  const message = location.state?.message;
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    productsListed: 0,
+    itemsSold: 0,
+    pendingOrders: 0,
+    itemsBought: 0
+  });
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const { isDarkMode } = useContext(DarkModeContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = getToken();
-        if (!token) return;
-
-        const response = await api.get("/user/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(response.data);
-      } catch (error) {
-        console.error("Failed to fetch user data", error);
-      }
-    };
-    fetchUser();
+    fetchDashboardData();
   }, []);
 
-  const toggleLogs = async () => {
-    const newState = !showLogs;
-    setShowLogs(newState);
+  const fetchDashboardData = async () => {
+    try {
+      // 1. Fetch User
+      const userRes = await api.get("/user/me");
+      setUser(userRes.data);
 
-    if (newState && logs.length === 0) {
-      try {
-        const token = getToken();
-        if (!token) return;
+      // 2. Fetch Stats (The new endpoint we made)
+      const statsRes = await api.get("/user/dashboard-stats");
+      setStats(statsRes.data);
 
-        const res = await api.get("/activity", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setLogs(res.data);
-      } catch (error) {
-        console.error("Failed to load logs", error);
-      }
+      // 3. Fetch Recent Incoming Orders (Reuse existing endpoint)
+      const ordersRes = await api.get("/orders/incoming-orders");
+      // Slice to take only the last 3 for the preview
+      setRecentOrders(ordersRes.data.slice(0, 3)); 
+
+    } catch (error) {
+      console.error("Dashboard Load Error", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={`min-h-screen ${
-        isDarkMode
-          ? "bg-gray-900 text-gray-100"
-          : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-900"
+    <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-800"}`}>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* --- HEADER SECTION --- */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className={`mt-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+              Welcome back, {user?.name}! Here's what's happening today.
+            </p>
+          </div>
+          <div className="mt-4 md:mt-0 flex gap-3">
+             <Link to="/my-products" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition shadow-lg shadow-indigo-500/30">
+               + Add Product
+             </Link>
+             <Link to="/shopping" className={`px-5 py-2.5 rounded-xl font-medium border transition ${isDarkMode ? "border-gray-600 hover:bg-gray-800" : "bg-white border-gray-200 hover:bg-gray-50"}`}>
+               Browse Market
+             </Link>
+          </div>
+        </div>
+
+        {/* --- STATS GRID --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          
+          {/* Card 1: Revenue */}
+          <StatCard 
+            title="Total Revenue" 
+            value={`$${stats.totalRevenue.toLocaleString()}`} 
+            icon={<svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+            color="green"
+            isDarkMode={isDarkMode}
+          />
+
+          {/* Card 2: Pending Orders */}
+          <StatCard 
+            title="Pending Orders" 
+            value={stats.pendingOrders} 
+            icon={<svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+            color="orange"
+            isDarkMode={isDarkMode}
+            onClick={() => navigate("/incoming-orders")} // Clickable!
+          />
+
+          {/* Card 3: Active Listings */}
+          <StatCard 
+            title="Active Listings" 
+            value={stats.productsListed} 
+            icon={<svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>}
+            color="blue"
+            isDarkMode={isDarkMode}
+            onClick={() => navigate("/my-products")}
+          />
+
+           {/* Card 4: Items Bought */}
+           <StatCard 
+            title="Items Purchased" 
+            value={stats.itemsBought} 
+            icon={<svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>}
+            color="purple"
+            isDarkMode={isDarkMode}
+          />
+        </div>
+
+        {/* --- MAIN CONTENT SPLIT --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Column: Recent Sales */}
+          <div className={`lg:col-span-2 rounded-2xl p-6 shadow-sm ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">Recent Incoming Orders</h3>
+              <Link to="/incoming-orders" className="text-indigo-500 hover:text-indigo-600 text-sm font-semibold">View All</Link>
+            </div>
+            
+            {recentOrders.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className={`text-sm border-b ${isDarkMode ? "text-gray-400 border-gray-700" : "text-gray-500 border-gray-100"}`}>
+                      <th className="py-3">Product</th>
+                      <th className="py-3">Buyer</th>
+                      <th className="py-3">Status</th>
+                      <th className="py-3 text-right">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm">
+                    {recentOrders.map((order) => (
+                      <tr key={order.id} className={`border-b group ${isDarkMode ? "border-gray-700 hover:bg-gray-750" : "border-gray-50 hover:bg-gray-50"}`}>
+                        <td className="py-4 font-medium">{order.product.title}</td>
+                        <td className={`py-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{order.buyer.name}</td>
+                        <td className="py-4">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                            order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                          }`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="py-4 text-right font-bold text-indigo-500">${order.product.price}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                 <p className="text-gray-500">No recent orders found.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Profile Summary */}
+          <div className="flex flex-col gap-6">
+            <div className={`rounded-2xl p-6 shadow-sm ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
+               <div className="flex items-center space-x-4 mb-4">
+                 <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600">
+                    {user?.name?.charAt(0).toUpperCase()}
+                 </div>
+                 <div>
+                   <h2 className="text-lg font-bold">{user?.name}</h2>
+                   <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>{user?.email}</p>
+                 </div>
+               </div>
+               <div className="space-y-3">
+                 <button onClick={() => navigate("/profile")} className={`w-full py-2.5 rounded-lg text-sm font-semibold transition ${isDarkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200 text-gray-700"}`}>
+                   Edit Profile
+                 </button>
+               </div>
+            </div>
+
+            {/* Quick Tips Box */}
+            <div className={`rounded-2xl p-6 shadow-sm border-l-4 border-indigo-500 ${isDarkMode ? "bg-indigo-900/20" : "bg-indigo-50"}`}>
+               <h4 className="font-bold text-indigo-600 mb-2">💡 Selling Tip</h4>
+               <p className={`text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                 Responding to messages within 1 hour increases your chance of selling by 40%. Check your inbox!
+               </p>
+               <Link to="/inbox" className="block mt-3 text-sm font-bold text-indigo-600 hover:underline">Go to Inbox →</Link>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// Helper Component for Stats Cards
+function StatCard({ title, value, icon, color, isDarkMode, onClick }) {
+  return (
+    <div 
+      onClick={onClick}
+      className={`p-6 rounded-2xl shadow-sm transition transform hover:-translate-y-1 ${onClick ? 'cursor-pointer' : ''} ${
+        isDarkMode ? "bg-gray-800" : "bg-white"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Success Message */}
-        {message && (
-          <div
-            className={`mb-6 p-4 rounded-lg flex items-center space-x-3 border ${
-              isDarkMode
-                ? "bg-green-800 border-green-600 text-green-200"
-                : "bg-green-50 border-green-200 text-green-700"
-            }`}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <p className="font-medium">{message}</p>
-          </div>
-        )}
-
-        {user ? (
-          <div className="space-y-6">
-            {/* User Profile Card */}
-            <div
-              className={`rounded-2xl shadow-lg p-6 ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-8 h-8 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h2
-                    className={`text-2xl font-bold ${
-                      isDarkMode ? "text-gray-100" : "text-gray-800"
-                    }`}
-                  >
-                    Profile Information
-                  </h2>
-                  <p
-                    className={`${
-                      isDarkMode ? "text-gray-300" : "text-gray-500"
-                    }`}
-                  >
-                    Your account details
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div
-                  className={`p-4 rounded-lg ${
-                    isDarkMode ? "bg-gray-700" : "bg-gray-50"
-                  }`}
-                >
-                  <p
-                    className={`text-sm mb-1 ${
-                      isDarkMode ? "text-gray-300" : "text-gray-500"
-                    }`}
-                  >
-                    Full Name
-                  </p>
-                  <p
-                    className={`text-lg font-semibold ${
-                      isDarkMode ? "text-gray-100" : "text-gray-800"
-                    }`}
-                  >
-                    {user.name}
-                  </p>
-                </div>
-                <div
-                  className={`p-4 rounded-lg ${
-                    isDarkMode ? "bg-gray-700" : "bg-gray-50"
-                  }`}
-                >
-                  <p
-                    className={`text-sm mb-1 ${
-                      isDarkMode ? "text-gray-300" : "text-gray-500"
-                    }`}
-                  >
-                    Email Address
-                  </p>
-                  <p
-                    className={`text-lg font-semibold ${
-                      isDarkMode ? "text-gray-100" : "text-gray-800"
-                    }`}
-                  >
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Activity Logs Section */}
-            <div
-              className={`rounded-2xl shadow-lg p-6 ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-indigo-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3
-                      className={`text-xl font-bold ${
-                        isDarkMode ? "text-gray-100" : "text-gray-800"
-                      }`}
-                    >
-                      Activity Logs
-                    </h3>
-                    <p
-                      className={`text-sm ${
-                        isDarkMode ? "text-gray-300" : "text-gray-500"
-                      }`}
-                    >
-                      View your recent activities
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={toggleLogs}
-                  className={`px-6 py-2 rounded-lg font-semibold transform transition duration-200 hover:scale-105 ${
-                    isDarkMode
-                      ? "bg-indigo-600 text-white hover:bg-indigo-500"
-                      : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700"
-                  }`}
-                >
-                  {showLogs ? "Hide Logs" : "Show Logs"}
-                </button>
-              </div>
-
-              {/* Logs Table */}
-              {showLogs && (
-                <div
-                  className={`overflow-hidden rounded-lg border ${
-                    isDarkMode ? "border-gray-700" : "border-gray-200"
-                  }`}
-                >
-                  <table className="min-w-full divide-y">
-                    <thead
-                      className={`${
-                        isDarkMode ? "bg-gray-700" : "bg-gray-50"
-                      }`}
-                    >
-                      <tr>
-                        <th
-                          className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                            isDarkMode ? "text-gray-300" : "text-gray-500"
-                          }`}
-                        >
-                          Date
-                        </th>
-                        <th
-                          className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                            isDarkMode ? "text-gray-300" : "text-gray-500"
-                          }`}
-                        >
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody
-                      className={`divide-y ${
-                        isDarkMode ? "divide-gray-700" : "divide-gray-200"
-                      }`}
-                    >
-                      {logs.length > 0 ? (
-                        logs.map((log, index) => (
-                          <tr
-                            key={index}
-                            className={`hover:${
-                              isDarkMode ? "bg-gray-700" : "bg-gray-50"
-                            } transition duration-150`}
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              {log.createdAt
-                                ? new Date(log.createdAt).toLocaleDateString()
-                                : "N/A"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                                  isDarkMode
-                                    ? "bg-blue-700 text-blue-200"
-                                    : "bg-blue-100 text-blue-800"
-                                }`}
-                              >
-                                {log.action}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan="2"
-                            className="px-6 py-8 text-center text-gray-500"
-                          >
-                            <svg
-                              className="w-12 h-12 mx-auto mb-3 text-gray-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                              />
-                            </svg>
-                            No activity found
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <svg
-                className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <p className="text-gray-600 font-medium">
-                Loading your dashboard...
-              </p>
-            </div>
-          </div>
-        )}
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-xl bg-${color}-100 bg-opacity-10`}>
+          {icon}
+        </div>
       </div>
+      <h3 className={`text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>{title}</h3>
+      <p className={`text-2xl font-bold mt-1 ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>{value}</p>
     </div>
   );
 }

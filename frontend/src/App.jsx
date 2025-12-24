@@ -19,7 +19,7 @@ import Messenger from "./pages/Messenger";
 import ForgotPassword from "./pages/ForgotPassword";
 import OrderPage from "./pages/OrderPage";
 import IncomingOrders from "./pages/IncomingOrders";
-
+import ChatBot from "./components/ChatBot";
 
 function App() {
   return (
@@ -163,9 +163,11 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
 
 
         </Routes>
+        <ChatBot />
       </BrowserRouter>
     </DarkModeProvider>
   );

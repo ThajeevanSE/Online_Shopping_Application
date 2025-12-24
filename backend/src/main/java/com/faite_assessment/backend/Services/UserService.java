@@ -5,6 +5,10 @@ import com.faite_assessment.backend.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.faite_assessment.backend.Dtos.DashboardStats;
+import com.faite_assessment.backend.Repositories.OrderRepository;
+import com.faite_assessment.backend.Repositories.ProductRepository;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +43,25 @@ public class UserService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+
+    public DashboardStats getUserStats(String email) {
+        Double revenue = orderRepository.calculateTotalRevenue(email);
+        long products = productRepository.countByUserEmail(email);
+        long sold = orderRepository.countBySellerEmailAndStatusNot(email, "CANCELLED");
+        long pending = orderRepository.countBySellerEmailAndStatus(email, "PENDING");
+        long bought = orderRepository.countByBuyerEmail(email);
+
+        return DashboardStats.builder()
+                .totalRevenue(revenue != null ? revenue : 0.0)
+                .productsListed(products)
+                .itemsSold(sold)
+                .pendingOrders(pending)
+                .itemsBought(bought)
+                .build();
     }
 
 
